@@ -6,7 +6,7 @@ import toast from "react-hot-toast";
 export const AppContext = createContext();
 
 export const AppContextProvider = ({ children }) => {
-    const currency = import.meta.VITE_CURRENCY;
+    const currency = import.meta.env.VITE_CURRENCY;
     const navigate = useNavigate();
     const [user, setUser] = useState(null);
     const [isSeller, setIsSeller] = useState(false);
@@ -54,6 +54,26 @@ export const AppContextProvider = ({ children }) => {
         setCartItems(cartData);
     };
 
+    // Gwt cart item count
+    const getCartCount = () => {
+        return Object.keys(cartItems).reduce((total, itemId) => {
+            return total + cartItems[itemId];
+        }, 0);
+    };
+
+    // Get cart total amount
+    const getCartAmount = () => {
+        const totalAmount = Object.keys(cartItems).reduce((total, itemId) => {
+            const itemInfo = products.find((product) => product._id === itemId);
+            if (itemInfo && cartItems[itemId] > 0) {
+                return total + itemInfo.offerPrice * cartItems[itemId];
+            }
+            return total;
+        }, 0);
+
+        return Number(totalAmount.toFixed(2));
+    };
+
     useEffect(() => {
         fetchProducts();
     }, []);
@@ -74,7 +94,9 @@ export const AppContextProvider = ({ children }) => {
         updatedCartItem,
         removeProductFromCart,
         searchQuery,
-        setSearchQuery
+        setSearchQuery,
+        getCartAmount,
+        getCartCount
     };
 
     return <AppContext.Provider value={value}>{children}</AppContext.Provider>;
