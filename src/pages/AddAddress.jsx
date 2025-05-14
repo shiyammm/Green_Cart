@@ -1,5 +1,7 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { assets } from "../assets/assets";
+import { useAppContext } from "../context/AppContext";
+import toast from "react-hot-toast";
 
 const InputFiled = ({ type, placeholder, name, handleChange, address }) => {
     return (
@@ -26,7 +28,9 @@ const AddAddress = () => {
         country: "",
         phone: ""
     });
-    const onSubmitHandler = () => {};
+
+    const { axios, user, navigate } = useAppContext();
+
     const handleChange = (e) => {
         const { name, value } = e.target;
         setAddress((prevAddress) => ({
@@ -34,6 +38,26 @@ const AddAddress = () => {
             [name]: value
         }));
     };
+    const onSubmitHandler = async (e) => {
+        e.preventDefault();
+        try {
+            const { data } = await axios.post("/api/address/add", { address });
+            if (data.success) {
+                toast.success(data.message);
+                navigate("/cart");
+            } else {
+                toast.error(data.message);
+            }
+        } catch (error) {
+            toast.error(error.message);
+        }
+    };
+
+    useEffect(() => {
+        if (!user) {
+            navigate("/cart");
+        }
+    }, []);
 
     return (
         <div className="mt-16 pb-16">
@@ -116,7 +140,7 @@ const AddAddress = () => {
                             type="number"
                             placeholder="Phone"
                         />
-                        <button className="w-ful mt-6 bg-primary text-white py-3 hover:bg-primary-dull transition cursor-pointer uppercase">
+                        <button className="w-ful mt-6 bg-primary text-white py-3 hover:bg-primary-dull transition cursor-pointer uppercase px-3">
                             Save Address
                         </button>
                     </form>

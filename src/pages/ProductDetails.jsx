@@ -76,6 +76,7 @@ const ProductDetails = () => {
                                                 ? assets.star_icon
                                                 : assets.star_dull_icon
                                         }
+                                        key={i}
                                         alt="Star Rating"
                                         className="md:w-4 w-3.5"
                                     />
