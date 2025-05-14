@@ -1,21 +1,59 @@
 import { useState } from "react";
 import { useAppContext } from "../context/AppContext";
+import toast from "react-hot-toast";
 
 const Login = () => {
     const [state, setState] = useState("login");
     const [name, setName] = useState("");
     const [email, setEmail] = useState("");
     const [password, setPassword] = useState("");
-    const { setShowUserLogin, setUser } = useAppContext();
+    const { setShowUserLogin, setUser, axios, navigate } = useAppContext();
 
     const submit = async (e) => {
         e.preventDefault();
-        setUser({
-            email: email,
-            name: name,
-            password: password
-        });
-        setShowUserLogin(false);
+        if (state === "register") {
+            setUser({
+                email: email,
+                name: name,
+                password: password
+            });
+            try {
+                const { data } = await axios.post("/api/user/sign-up", {
+                    name,
+                    email,
+                    password
+                });
+
+                if (data.success) {
+                    navigate("/");
+                    setShowUserLogin(false);
+                    setUser(data.user);
+                    toast.success("Signed Up");
+                } else {
+                    toast.error(data.message);
+                }
+            } catch (error) {
+                toast.error(error.message);
+            }
+        } else {
+            try {
+                const { data } = await axios.post("/api/user/sign-in", {
+                    email,
+                    password
+                });
+
+                if (data.success) {
+                    setUser(data.user);
+                    navigate("/");
+                    setShowUserLogin(false);
+                    toast.success("Logged In");
+                } else {
+                    toast.error(data.message);
+                }
+            } catch (error) {
+                toast.error(error.message);
+            }
+        }
     };
 
     return (
